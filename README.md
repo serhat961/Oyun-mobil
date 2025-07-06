@@ -6,11 +6,13 @@ A revolutionary mobile game that combines the addictive gameplay of Block Blast 
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-lightgrey.svg)
 
-## 🎮 Game Overview
+## 🎮 Game Overview / Oyun Özeti
 
 Polyglot Puzzle transforms language learning into an engaging puzzle experience. Players arrange tetromino-style pieces on an 8x8 grid while learning vocabulary through contextual exposure and spaced repetition algorithms.
 
-### Key Features
+Polyglot Puzzle, dil öğrenmeyi eğlenceli bir bulmaca deneyimine dönüştürür. Oyuncular 8x8 ızgarada tetromino tarzı parçaları yerleştirirken, bağlamsal maruz kalma ve aralıklı tekrar algoritmaları aracılığıyla kelime öğrenirler.
+
+### Key Features / Temel Özellikler
 
 - **Block Blast Mechanics**: Classic tetromino puzzle gameplay with line clearing
 - **Language Learning Integration**: Words assigned to pieces with translations
@@ -19,6 +21,8 @@ Polyglot Puzzle transforms language learning into an engaging puzzle experience.
 - **Hybrid Monetization**: Ads + IAP + Subscriptions
 - **Offline Support**: Learn without internet connection
 - **Progress Sync**: Cloud synchronization with Supabase
+- **AI-Powered**: Gemini AI integration for dynamic vocabulary generation
+- **Multi-Language**: Turkish ↔ English support with more languages coming
 
 ## 🏗️ Architecture
 
@@ -96,7 +100,34 @@ lib/
    flutter run
    ```
 
-## 🎯 Core Features Implementation
+## � Supported Languages
+
+### Currently Available
+- 🇹🇷 **Turkish (Türkçe)** ↔ 🇬🇧 **English (İngilizce)**
+
+### Coming Soon
+- 🇩🇪 German (Almanca)
+- 🇫🇷 French (Fransızca)  
+- 🇪🇸 Spanish (İspanyolca)
+- 🇮🇹 Italian (İtalyanca)
+- 🇯🇵 Japanese (Japonca)
+- 🇰🇷 Korean (Korece)
+
+### Gemini AI Integration
+
+The game uses Google's Gemini AI to:
+- Generate vocabulary lists based on topics and difficulty
+- Provide accurate translations with pronunciation guides
+- Create contextual example sentences
+- Adapt to learner's progress
+
+**Setup Gemini API:**
+```bash
+# Add to your .env file
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+## �🎯 Core Features Implementation
 
 ### Game Mechanics
 
