@@ -3,6 +3,17 @@ import 'package:collection/collection.dart';
 import 'piece.dart';
 import 'position.dart';
 
+class ClearLines {
+  final List<int> rows;
+  final List<int> cols;
+
+  ClearLines({required this.rows, required this.cols});
+
+  bool get isEmpty => rows.isEmpty && cols.isEmpty;
+
+  int get lineCount => rows.length + cols.length;
+}
+
 class GameBoard {
   static const int size = 8;
   final List<List<bool>> _cells; // true if filled
@@ -34,7 +45,7 @@ class GameBoard {
     return GameBoard._(newCells);
   }
 
-  List<int> detectClears() {
+  ClearLines detectClears() {
     final clearedRows = <int>[];
     final clearedCols = <int>[];
 
@@ -43,20 +54,22 @@ class GameBoard {
       if (_cells.every((row) => row[i])) clearedCols.add(i);
     }
 
-    return [...clearedRows, ...clearedCols];
+    return ClearLines(rows: clearedRows, cols: clearedCols);
   }
 
-  GameBoard clearLines(List<int> lines) {
+  GameBoard clearLines(ClearLines lines) {
     var newCells = _deepCopy();
-    for (final row in lines.where((l) => l < size)) {
+
+    for (final row in lines.rows) {
       newCells[row] = List.filled(size, false);
     }
-    for (final col in lines.where((l) => l >= size)) {
-      final c = col - size;
+
+    for (final col in lines.cols) {
       for (var r = 0; r < size; r++) {
-        newCells[r][c] = false;
+        newCells[r][col] = false;
       }
     }
+
     return GameBoard._(newCells);
   }
 

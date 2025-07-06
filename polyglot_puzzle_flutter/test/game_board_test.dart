@@ -15,7 +15,7 @@ void main() {
         board = board.place(PiecePlacement(piece, Position(0, col)));
       }
       final cleared = board.detectClears();
-      expect(cleared.contains(0), isTrue);
+      expect(cleared.rows.contains(0), isTrue);
     });
   });
 }
