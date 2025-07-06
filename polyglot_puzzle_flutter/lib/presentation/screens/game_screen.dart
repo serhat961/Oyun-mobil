@@ -7,6 +7,7 @@ import '../../domain/game_board.dart';
 import '../../domain/game_piece.dart';
 import '../../domain/position.dart';
 import '../widgets/piece_widget.dart';
+import '../widgets/ad_banner.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -39,6 +40,8 @@ class GameScreen extends StatelessWidget {
               _BoardView(cellSize: cellSize),
               const SizedBox(height: 24),
               _PieceBar(cellSize: cellSize * 0.8),
+              const SizedBox(height: 32),
+              const AdBanner(),
             ],
           );
         },

@@ -3,9 +3,13 @@ import 'package:provider/provider.dart';
 
 import 'presentation/screens/game_screen.dart';
 import 'presentation/view_models/game_view_model.dart';
+import 'monetization/ad_manager.dart';
+import 'monetization/purchase_manager.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AdManager.instance.initialize();
+  await PurchaseManager.instance.initialize();
   runApp(const PolyglotPuzzleApp());
 }
 
