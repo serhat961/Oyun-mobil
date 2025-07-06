@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../view_models/game_view_model.dart';
 import '../../domain/game_board.dart';
-import '../../domain/piece.dart';
+import '../../domain/game_piece.dart';
 import '../../domain/position.dart';
 import '../widgets/piece_widget.dart';
 
@@ -14,6 +14,12 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameViewModel>();
+    if (!viewModel.isReady) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Score: ${viewModel.score}'),
@@ -58,7 +64,7 @@ class _BoardView extends StatelessWidget {
           children: List.generate(GameBoard.size, (col) {
             final origin = Position(row, col);
             final filled = board.isFilled(origin);
-            return DragTarget<Piece>(
+            return DragTarget<GamePiece>(
               onWillAccept: (piece) {
                 if (piece == null) return false;
                 return viewModel.canPlaceCurrentPiece(origin);
@@ -105,28 +111,34 @@ class _PieceBar extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        LongPressDraggable<Piece>(
+        LongPressDraggable<GamePiece>(
           data: current,
           feedback: Material(
             color: Colors.transparent,
-            child: PieceWidget(piece: current, cellSize: cellSize, color: Colors.deepPurpleAccent),
+            child: PieceWidget(piece: current.shape, cellSize: cellSize, color: Colors.deepPurpleAccent),
           ),
           childWhenDragging: Opacity(
             opacity: 0.3,
-            child: PieceWidget(piece: current, cellSize: cellSize),
+            child: PieceWidget(piece: current.shape, cellSize: cellSize),
           ),
           onDragEnd: (details) {
             if (!details.wasAccepted) {
               HapticFeedback.heavyImpact();
             }
           },
-          child: PieceWidget(piece: current, cellSize: cellSize),
+          child: Tooltip(
+            message: '${current.word.term} = ${current.word.translation}',
+            child: PieceWidget(piece: current.shape, cellSize: cellSize),
+          ),
         ),
         const SizedBox(width: 32),
         // Preview next 3 pieces
-        ...next.map((p) => Padding(
+        ...next.map((gp) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: PieceWidget(piece: p, cellSize: cellSize * 0.7, color: Colors.blueGrey),
+              child: Tooltip(
+                message: '${gp.word.term} = ${gp.word.translation}',
+                child: PieceWidget(piece: gp.shape, cellSize: cellSize * 0.7, color: Colors.blueGrey),
+              ),
             )),
       ],
     );
