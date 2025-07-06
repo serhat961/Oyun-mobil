@@ -1,0 +1,30 @@
+name: polyglot_puzzle_flutter
+description: >-
+  Polyglot Puzzle mobile game combining block blast mechanics with language learning.
+version: 0.1.0
+publish_to: "none"
+
+environment:
+  sdk: "^3.3.0"
+  flutter: "^3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  sqflite: ^2.3.2
+  path_provider: ^2.1.2
+  supabase_flutter: ^2.3.3
+  google_mobile_ads: ^5.1.0
+  in_app_purchase: ^3.1.4
+  vibration: ^1.9.0
+  equatable: ^2.0.5
+  collection: ^1.17.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
