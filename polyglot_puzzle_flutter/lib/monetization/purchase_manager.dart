@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:flutter/material.dart';
+import 'hint_manager.dart';
 
 class PurchaseManager {
   static final PurchaseManager instance = PurchaseManager._internal();
@@ -110,6 +111,11 @@ class PurchaseManager {
     debugPrint('Verified purchase: ${details.productID}');
     entitlements.value = {...entitlements.value, details.productID};
     _saveEntitlements();
+
+    if (details.productID == _hintBundleId) {
+      await HintManager.instance.addHints(10);
+    }
+
     if (details.pendingCompletePurchase) {
       await _iap.completePurchase(details);
     }

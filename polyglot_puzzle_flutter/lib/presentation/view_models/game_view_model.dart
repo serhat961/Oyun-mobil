@@ -100,6 +100,20 @@ class GameViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> useHint() async {
+    // Try to find first valid placement
+    for (int r = 0; r < GameBoard.size; r++) {
+      for (int c = 0; c < GameBoard.size; c++) {
+        final pos = Position(r, c);
+        if (canPlaceCurrentPiece(pos)) {
+          await placeCurrentPiece(pos);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   Future<void> reset() async {
     _initialized = false;
     _board = GameBoard.empty();

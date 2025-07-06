@@ -9,6 +9,8 @@ import '../../domain/position.dart';
 import '../widgets/piece_widget.dart';
 import '../widgets/ad_banner.dart';
 import '../screens/store_screen.dart';
+import '../../monetization/hint_manager.dart';
+import '../../monetization/ad_manager.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -29,6 +31,46 @@ class GameScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: viewModel.reset,
+          ),
+          ValueListenableBuilder<int>(
+            valueListenable: HintManager.instance.hints,
+            builder: (context, hints, _) {
+              return IconButton(
+                icon: Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    const Icon(Icons.lightbulb_outline),
+                    if (hints > 0)
+                      CircleAvatar(
+                        radius: 8,
+                        backgroundColor: Colors.amber,
+                        child: Text('$hints', style: const TextStyle(fontSize: 10, color: Colors.black)),
+                      ),
+                  ],
+                ),
+                onPressed: () async {
+                  if (HintManager.instance.hints.value > 0) {
+                    final consumed = await HintManager.instance.consumeHint();
+                    if (consumed) {
+                      await viewModel.useHint();
+                    }
+                  } else {
+                    final rewarded = await AdManager.instance.loadRewardedAd();
+                    if (rewarded != null) {
+                      rewarded.fullScreenContentCallback = FullScreenContentCallback(
+                        onAdDismissedFullScreenContent: (ad) => ad.dispose(),
+                      );
+                      rewarded.setImmersiveMode(true);
+                      rewarded.show(onUserEarnedReward: (ad, reward) async {
+                        await HintManager.instance.addHints(1);
+                      });
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ad not available')));
+                    }
+                  }
+                },
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.shopping_cart),
