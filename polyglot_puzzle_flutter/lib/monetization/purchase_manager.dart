@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:flutter/material.dart';
 
 class PurchaseManager {
   static final PurchaseManager instance = PurchaseManager._internal();
@@ -46,21 +47,23 @@ class PurchaseManager {
   Future<void> buyHintBundle() async => _enqueue(_hintBundleId);
   Future<void> buyMonthlySub() async => _enqueue(_monthlySubId);
 
-  bool isEntitled(String productId) => _entitlements.contains(productId);
+  bool isEntitled(String productId) => entitlements.value.contains(productId);
+
+  String? price(String productId) => _productDetails[productId]?.price;
 
   // Secure storage entitlements
-  final Set<String> _entitlements = {};
+  final ValueNotifier<Set<String>> entitlements = ValueNotifier({});
 
   Future<void> _restorePurchases() async {
     await _iap.restorePurchases();
     final cached = await _entitlementStorage.read(key: 'entitlements');
     if (cached != null) {
-      _entitlements.addAll(cached.split(','));
+      entitlements.value = {...cached.split(',')};
     }
   }
 
   void _saveEntitlements() {
-    _entitlementStorage.write(key: 'entitlements', value: _entitlements.join(','));
+    _entitlementStorage.write(key: 'entitlements', value: entitlements.value.join(','));
   }
 
   void _enqueue(String productId) {
@@ -105,7 +108,7 @@ class PurchaseManager {
   Future<void> _verifyPurchase(PurchaseDetails details) async {
     // TODO: implement receipt validation with server if needed.
     debugPrint('Verified purchase: ${details.productID}');
-    _entitlements.add(details.productID);
+    entitlements.value = {...entitlements.value, details.productID};
     _saveEntitlements();
     if (details.pendingCompletePurchase) {
       await _iap.completePurchase(details);

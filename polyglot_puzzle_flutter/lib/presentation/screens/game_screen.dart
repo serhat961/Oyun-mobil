@@ -8,6 +8,7 @@ import '../../domain/game_piece.dart';
 import '../../domain/position.dart';
 import '../widgets/piece_widget.dart';
 import '../widgets/ad_banner.dart';
+import '../screens/store_screen.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -28,6 +29,12 @@ class GameScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: viewModel.reset,
+          ),
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StoreScreen()));
+            },
           ),
         ],
       ),

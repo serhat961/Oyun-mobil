@@ -9,6 +9,7 @@ import '../../domain/vocab_word.dart';
 import '../../data/word_repository.dart';
 import '../../domain/score_calculator.dart';
 import '../../domain/position.dart';
+import '../../monetization/ad_manager.dart';
 
 class GameViewModel extends ChangeNotifier {
   GameBoard _board = GameBoard.empty();
@@ -22,6 +23,8 @@ class GameViewModel extends ChangeNotifier {
 
   late GamePiece _currentPiece;
   final List<GamePiece> _nextPieces = [];
+
+  int _placementCount = 0;
 
   GameViewModel() {
     _initQueue();
@@ -68,6 +71,11 @@ class GameViewModel extends ChangeNotifier {
     await _wordRepo.review(_currentPiece.word, 4);
     notifyListeners();
 
+    _placementCount++;
+    if (_placementCount % 10 == 0) {
+      AdManager.instance.showInterstitial(onShown: () {}, onFailed: () {});
+    }
+
     // Cascade clear loop
     int chain = 1;
     while (true) {
@@ -97,5 +105,6 @@ class GameViewModel extends ChangeNotifier {
     _board = GameBoard.empty();
     _scoreCalculator.reset();
     await _initQueue();
+    _placementCount = 0;
   }
 }
