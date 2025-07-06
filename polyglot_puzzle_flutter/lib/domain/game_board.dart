@@ -88,4 +88,22 @@ class GameBoard {
 
   @override
   int get hashCode => const DeepCollectionEquality().hash(_cells);
+
+  /// Returns true if [piece] can be placed anywhere on the board.
+  bool canPlaceAnywhere(Piece piece) {
+    for (var row = 0; row < size; row++) {
+      for (var col = 0; col < size; col++) {
+        if (canPlace(PiecePlacement(piece, Position(row, col)))) return true;
+      }
+    }
+    return false;
+  }
+
+  /// Game is over when none of the [candidatePieces] can be placed.
+  bool isGameOver(Iterable<Piece> candidatePieces) {
+    for (final piece in candidatePieces) {
+      if (canPlaceAnywhere(piece)) return false;
+    }
+    return true;
+  }
 }
