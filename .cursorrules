@@ -1,0 +1,204 @@
+# Polyglot Puzzle Development Rules
+
+## Language and Framework
+- Use Flutter 3.22+ with Dart 3.4+
+- Enable all lint rules in analysis_options.yaml with custom rules
+- Prefer const constructors and immutable data structures for performance
+- Use latest stable packages, avoid beta/dev versions in production
+- Enable null safety and strict mode in all files
+
+## Code Style Guidelines
+- Max line length: 80 characters (mobile-friendly)
+- Use trailing commas for better formatting and git diffs
+- Prefer single quotes for strings, double quotes for interpolation
+- Group imports: dart → flutter → package → relative
+- Use meaningful variable names: `isGameActive` not `active`
+- Add comprehensive dartdoc comments for public APIs
+
+## Flutter-Specific Rules
+- Separate business logic from UI widgets (Clean Architecture)
+- Use `context.watch()` for reactive UI updates with Riverpod
+- Implement `Key` for list items and animations (ValueKey preferred)
+- Cache expensive computations with `useMemoized` or `computed`
+- Use `FutureBuilder` and `StreamBuilder` for async UI updates
+- Implement proper disposal in StatefulWidgets (`dispose()` method)
+- Use `MaterialApp.router` for navigation with go_router package
+- Prefer `ListView.builder` over `ListView` for performance
+
+## Game Development Patterns
+When implementing game features:
+1. Start with data models (immutable with freezed + json_annotation)
+2. Create repository interfaces with abstract classes
+3. Implement business logic in Riverpod controllers/notifiers
+4. Build UI components with responsive design
+5. Add animations after functionality works (use AnimationController)
+6. Implement proper game state management (playing, paused, game-over)
+7. Use CustomPainter for complex game graphics
+8. Implement efficient collision detection algorithms
+
+## State Management (Riverpod)
+- Use `StateNotifier` for complex state logic
+- Prefer `AsyncNotifier` for async operations
+- Use `FutureProvider` for one-time async data
+- Implement proper loading/error states
+- Use `family` providers for parameterized state
+- Dispose resources in provider `dispose()` methods
+
+## Performance Optimization
+- Use `RepaintBoundary` for expensive widgets
+- Implement lazy loading with `ListView.builder`
+- Use `const` constructors everywhere possible
+- Avoid rebuilds with `Consumer` widgets
+- Use `flutter_hooks` for efficient state management
+- Implement proper image caching with `cached_network_image`
+- Use `Isolate` for heavy computations
+- Profile with Flutter DevTools regularly
+
+## Game-Specific Performance
+- Target 60fps on mid-range devices (2GB RAM+)
+- Use object pooling for frequently created/destroyed objects
+- Implement efficient grid-based collision detection
+- Use `Canvas` and `CustomPainter` for complex animations
+- Batch rendering operations where possible
+- Optimize texture loading and sprite management
+- Implement proper audio management (pause/resume)
+
+## Testing Requirements
+- Unit tests for all game logic (target 90% coverage)
+- Widget tests for critical UI components
+- Integration tests for complete game flows
+- Golden tests for visual regression prevention
+- Mock external dependencies (APIs, storage)
+- Use `testWidgets` for widget testing
+- Implement proper test setup/teardown
+
+## Error Handling & Logging
+- Never use `print()`, use `logger` package or Firebase Crashlytics
+- Wrap all async operations in try-catch with proper error types
+- Show user-friendly error messages with localization
+- Log errors to Crashlytics in production with context
+- Implement proper error recovery mechanisms
+- Use `Result` pattern for error handling (dartz package)
+- Add user-friendly fallback UI for error states
+
+## Security & Privacy
+- Never commit API keys or secrets to version control
+- Use environment variables for sensitive data
+- Implement proper input validation and sanitization
+- Use secure storage for sensitive user data
+- Implement proper authentication with JWT tokens
+- Add certificate pinning for API calls
+- Follow GDPR/CCPA compliance requirements
+
+## Optimization Priorities
+1. Smooth 60fps animations with `AnimationController`
+2. Minimal battery usage (pause animations when inactive)
+3. Quick startup time (<2 seconds cold start)
+4. Efficient memory management (max 150MB)
+5. Responsive UI on all screen sizes
+6. Offline-first architecture with local caching
+
+## Architecture Guidelines
+- Follow Clean Architecture principles strictly
+- Use dependency injection with `get_it` + `injectable`
+- Implement Repository pattern for data access
+- Use BLoC/Cubit pattern for business logic
+- Separate concerns: UI, Logic, Data
+- Use interfaces for testability
+- Implement proper error boundaries
+
+## Animation Best Practices
+- Use `AnimationController` for complex animations
+- Implement proper animation disposal
+- Use `Tween` for smooth transitions
+- Add haptic feedback for user interactions
+- Use `Hero` widgets for page transitions
+- Implement proper animation curves
+- Consider accessibility (reduce motion settings)
+
+## Mobile Game Specific Rules
+- Implement proper orientation handling
+- Add support for different screen densities
+- Use proper safe area handling
+- Implement battery optimization
+- Add proper memory management for game assets
+- Use efficient audio management
+- Implement proper pause/resume handling
+- Add accessibility features (VoiceOver, TalkBack)
+
+## Networking & Data Management
+- Use `dio` package for HTTP requests
+- Implement proper caching strategies
+- Use `hive` for local data storage
+- Implement offline-first approach
+- Add proper loading states
+- Use connection state management
+- Implement proper sync mechanisms
+
+## Localization & Internationalization
+- Use `flutter_localizations` for i18n
+- Implement proper RTL language support
+- Use ARB files for translation management
+- Add cultural adaptations (date/number formats)
+- Implement dynamic locale switching
+- Use proper text scaling support
+- Add accessibility labels in all languages
+
+## Development Workflow
+- Use feature branch workflow with descriptive names
+- Write meaningful commit messages (Conventional Commits)
+- Use PR templates with screenshots
+- Run tests before every commit
+- Use pre-commit hooks for code quality
+- Implement CI/CD pipeline with automated testing
+- Use semantic versioning for releases
+
+## Code Quality Rules
+- Run `flutter analyze` before every commit
+- Use `dart fix --apply` for automatic fixes
+- Implement proper code documentation
+- Use meaningful test descriptions
+- Follow DRY principle strictly
+- Implement proper abstraction levels
+- Use design patterns appropriately
+
+## Debugging & Monitoring
+- Use Flutter Inspector for UI debugging
+- Implement proper crash reporting
+- Add performance monitoring
+- Use proper logging levels
+- Implement user analytics
+- Add A/B testing capabilities
+- Monitor app performance metrics
+
+## Accessibility Guidelines
+- Add semantic labels for screen readers
+- Implement proper color contrast
+- Add keyboard navigation support
+- Use proper focus management
+- Test with accessibility tools
+- Add haptic feedback for interactions
+- Support system accessibility settings
+
+## Package Management
+- Keep dependencies up to date
+- Use exact versions for production
+- Avoid packages with security issues
+- Prefer maintained packages over abandoned ones
+- Use dev_dependencies for development tools
+- Implement proper package documentation
+
+## Build & Deployment
+- Use build flavors for different environments
+- Implement proper obfuscation for release builds
+- Use proper signing for app stores
+- Implement gradual rollout strategy
+- Add crash reporting for production
+- Use proper version management
+- Implement proper build automation
+
+---
+
+*Always prioritize user experience and performance over feature complexity*
+*Test on real devices regularly, not just emulators*
+*Keep learning and stay updated with Flutter best practices* 
