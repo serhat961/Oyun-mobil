@@ -5,6 +5,7 @@ import '../domain/sm2.dart';
 import '../domain/vocab_word.dart';
 import 'word_database.dart';
 import 'translation_service.dart';
+import 'sync_service.dart';
 
 class WordRepository {
   static final WordRepository instance = WordRepository._internal();
@@ -24,7 +25,9 @@ class WordRepository {
     final word = VocabWord(term: term, translation: translation);
     final db = await _db;
     final id = await db.insert('words', word.toMap());
-    return word.copyWith(id: id);
+    final w = word.copyWith(id: id);
+    SyncService.instance.syncWord(w);
+    return w;
   }
 
   Future<VocabWord> addTermAuto(String term, {String targetLang = 'Turkish'}) async {
@@ -42,6 +45,7 @@ class WordRepository {
   Future<void> updateWord(VocabWord word) async {
     final db = await _db;
     await db.update('words', word.toMap(), where: 'id = ?', whereArgs: [word.id]);
+    SyncService.instance.syncWord(word);
   }
 
   Future<void> markExposure(VocabWord word) async {

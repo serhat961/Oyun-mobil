@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:flutter/material.dart';
 import 'hint_manager.dart';
+import '../data/sync_service.dart';
 
 class PurchaseManager {
   static final PurchaseManager instance = PurchaseManager._internal();
@@ -61,6 +62,7 @@ class PurchaseManager {
     if (cached != null) {
       entitlements.value = {...cached.split(',')};
     }
+    SyncService.instance.syncEntitlements(entitlements.value);
   }
 
   void _saveEntitlements() {
@@ -111,6 +113,7 @@ class PurchaseManager {
     debugPrint('Verified purchase: ${details.productID}');
     entitlements.value = {...entitlements.value, details.productID};
     _saveEntitlements();
+    SyncService.instance.syncEntitlements(entitlements.value);
 
     if (details.productID == _hintBundleId) {
       await HintManager.instance.addHints(10);

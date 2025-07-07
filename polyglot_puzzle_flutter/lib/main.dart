@@ -6,12 +6,14 @@ import 'presentation/view_models/game_view_model.dart';
 import 'monetization/ad_manager.dart';
 import 'monetization/purchase_manager.dart';
 import 'monetization/hint_manager.dart';
+import 'data/sync_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AdManager.instance.initialize();
   await PurchaseManager.instance.initialize();
   await HintManager.instance.initialize();
+  await SyncService.instance.initialize();
   runApp(const PolyglotPuzzleApp());
 }
 

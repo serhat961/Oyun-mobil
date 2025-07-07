@@ -12,6 +12,8 @@ import '../screens/store_screen.dart';
 import '../../monetization/hint_manager.dart';
 import '../../monetization/ad_manager.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../../domain/vocab_word.dart';
+import '../../data/translation_service.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -98,6 +100,34 @@ class GameScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _showWordDetails(BuildContext context, VocabWord word) async {
+  showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return FutureBuilder<String?>(
+          future: TranslationService.instance.explanation(text: word.term, targetLang: 'Turkish'),
+          builder: (ctx, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
+            }
+            final explanation = snap.data ?? 'No explanation available.';
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${word.term} = ${word.translation}', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 12),
+                  Text(explanation),
+                ],
+              ),
+            );
+          },
+        );
+      });
 }
 
 class _BoardView extends StatelessWidget {
@@ -197,18 +227,24 @@ class _PieceBar extends StatelessWidget {
               HapticFeedback.heavyImpact();
             }
           },
-          child: Tooltip(
-            message: '${current.word.term} = ${current.word.translation}',
-            child: PieceWidget(piece: current.shape, cellSize: cellSize),
+          child: GestureDetector(
+            onDoubleTap: () => _showWordDetails(context, current.word),
+            child: Tooltip(
+              message: '${current.word.term} = ${current.word.translation}',
+              child: PieceWidget(piece: current.shape, cellSize: cellSize),
+            ),
           ),
         ),
         const SizedBox(width: 32),
         // Preview next 3 pieces
         ...next.map((gp) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Tooltip(
-                message: '${gp.word.term} = ${gp.word.translation}',
-                child: PieceWidget(piece: gp.shape, cellSize: cellSize * 0.7, color: Colors.blueGrey),
+              child: GestureDetector(
+                onDoubleTap: () => _showWordDetails(context, gp.word),
+                child: Tooltip(
+                  message: '${gp.word.term} = ${gp.word.translation}',
+                  child: PieceWidget(piece: gp.shape, cellSize: cellSize * 0.7, color: Colors.blueGrey),
+                ),
               ),
             )),
       ],
