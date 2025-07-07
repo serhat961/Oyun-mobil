@@ -6,7 +6,7 @@ import '../domain/vocab_word.dart';
 import 'word_database.dart';
 import 'translation_service.dart';
 import 'sync_service.dart';
-import 'purchase_manager.dart';
+import '../monetization/purchase_manager.dart';
 
 class WordRepository {
   static final WordRepository instance = WordRepository._internal();

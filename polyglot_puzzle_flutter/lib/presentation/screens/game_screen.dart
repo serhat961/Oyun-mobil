@@ -14,6 +14,8 @@ import '../../monetization/ad_manager.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../domain/vocab_word.dart';
 import '../../data/translation_service.dart';
+import '../../l10n/app_localizations.dart';
+import '../screens/settings_screen.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -21,6 +23,7 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameViewModel>();
+    final loc = AppLocalizations.of(context);
     if (!viewModel.isReady) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -29,7 +32,7 @@ class GameScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Score: ${viewModel.score}'),
+        title: Text('${loc.score}: ${viewModel.score}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -79,6 +82,12 @@ class GameScreen extends StatelessWidget {
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StoreScreen()));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
             },
           ),
         ],
