@@ -16,6 +16,8 @@ import '../../domain/vocab_word.dart';
 import '../../data/translation_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../screens/settings_screen.dart';
+import './game_over_dialog.dart';
+import '../../domain/score_repository.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -28,6 +30,24 @@ class GameScreen extends StatelessWidget {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
+    }
+
+    if (viewModel.gameOver) {
+      Future.microtask(() async {
+        final best = await ScoreRepository.instance.getBestScore();
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => GameOverDialog(
+            score: viewModel.score,
+            best: best,
+            onRestart: () {
+              Navigator.of(context).pop();
+              viewModel.reset();
+            },
+          ),
+        );
+      });
     }
 
     return Scaffold(

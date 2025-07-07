@@ -10,6 +10,7 @@ import '../../data/word_repository.dart';
 import '../../domain/score_calculator.dart';
 import '../../domain/position.dart';
 import '../../monetization/ad_manager.dart';
+import '../../domain/score_repository.dart';
 
 class GameViewModel extends ChangeNotifier {
   GameBoard _board = GameBoard.empty();
@@ -20,6 +21,8 @@ class GameViewModel extends ChangeNotifier {
 
   bool _initialized = false;
   bool get isReady => _initialized;
+  bool _gameOver = false;
+  bool get gameOver => _gameOver;
 
   late GamePiece _currentPiece;
   final List<GamePiece> _nextPieces = [];
@@ -126,6 +129,17 @@ class GameViewModel extends ChangeNotifier {
     final newPieces = await _generateGamePieces(1);
     _nextPieces.addAll(newPieces);
     notifyListeners();
+
+    _checkGameOver();
+  }
+
+  void _checkGameOver() async {
+    final candidatePieces = [_currentPiece.shape, ..._nextPieces.map((gp) => gp.shape)];
+    if (_board.isGameOver(candidatePieces)) {
+      _gameOver = true;
+      await ScoreRepository.instance.saveScore(score);
+      notifyListeners();
+    }
   }
 
   Future<bool> useHint() async {
@@ -149,5 +163,6 @@ class GameViewModel extends ChangeNotifier {
     await _initQueue();
     _placementCount = 0;
     _clearingPositions = {};
+    _gameOver = false;
   }
 }
