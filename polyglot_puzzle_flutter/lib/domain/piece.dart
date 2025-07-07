@@ -8,6 +8,31 @@ class Piece {
 
   const Piece(this.type, this.blocks);
 
+  Piece rotatedCW() {
+    // (row, col) -> (col, maxRow - row)
+    final maxRow = blocks.map((b) => b.row).reduce((a, b) => a > b ? a : b);
+    final rotated = blocks
+        .map((b) => Position(b.col, maxRow - b.row))
+        .toList(growable: false);
+    // normalize to top-left origin
+    final minRow = rotated.map((b) => b.row).reduce((a, b) => a < b ? a : b);
+    final minCol = rotated.map((b) => b.col).reduce((a, b) => a < b ? a : b);
+    return Piece(type,
+        rotated.map((p) => Position(p.row - minRow, p.col - minCol)).toList());
+  }
+
+  Piece rotatedCCW() {
+    // (row, col) -> (maxCol - col, row)
+    final maxCol = blocks.map((b) => b.col).reduce((a, b) => a > b ? a : b);
+    final rotated = blocks
+        .map((b) => Position(maxCol - b.col, b.row))
+        .toList(growable: false);
+    final minRow = rotated.map((b) => b.row).reduce((a, b) => a < b ? a : b);
+    final minCol = rotated.map((b) => b.col).reduce((a, b) => a < b ? a : b);
+    return Piece(type,
+        rotated.map((p) => Position(p.row - minRow, p.col - minCol)).toList());
+  }
+
   static List<Piece> get allTemplates => [
         Piece(TetrominoType.I, [
           Position(0, 0),

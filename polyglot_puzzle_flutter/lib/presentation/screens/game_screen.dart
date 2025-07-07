@@ -11,6 +11,7 @@ import '../widgets/ad_banner.dart';
 import '../screens/store_screen.dart';
 import '../../monetization/hint_manager.dart';
 import '../../monetization/ad_manager.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -116,6 +117,7 @@ class _BoardView extends StatelessWidget {
           children: List.generate(GameBoard.size, (col) {
             final origin = Position(row, col);
             final filled = board.isFilled(origin);
+            final clearing = viewModel.clearingPositions.contains(origin);
             return DragTarget<GamePiece>(
               onWillAccept: (piece) {
                 if (piece == null) return false;
@@ -133,13 +135,16 @@ class _BoardView extends StatelessWidget {
                   height: cellSize,
                   margin: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
-                    color: filled
-                        ? Colors.deepPurple
-                        : isHovering
-                            ? Colors.deepPurple.withOpacity(0.3)
-                            : Colors.grey.shade800,
+                    color: clearing
+                        ? Colors.orange
+                        : filled
+                            ? Colors.deepPurple
+                            : isHovering
+                                ? Colors.deepPurple.withOpacity(0.3)
+                                : Colors.grey.shade800,
                     borderRadius: BorderRadius.circular(4),
                   ),
+                  // additional animation: scale
                 );
               },
             );
@@ -163,6 +168,20 @@ class _PieceBar extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // rotation buttons
+        Column(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.rotate_left),
+              onPressed: () => viewModel.rotateCurrentPieceCCW(),
+            ),
+            IconButton(
+              icon: const Icon(Icons.rotate_right),
+              onPressed: () => viewModel.rotateCurrentPieceCW(),
+            ),
+          ],
+        ),
+        const SizedBox(width: 8),
         LongPressDraggable<GamePiece>(
           data: current,
           feedback: Material(

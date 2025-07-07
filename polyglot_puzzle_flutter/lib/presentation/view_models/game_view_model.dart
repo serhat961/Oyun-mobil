@@ -57,6 +57,26 @@ class GameViewModel extends ChangeNotifier {
   GamePiece get currentPiece => _currentPiece;
   List<GamePiece> get nextPieces => List.unmodifiable(_nextPieces);
 
+  // For animations
+  Set<Position> _clearingPositions = {};
+  Set<Position> get clearingPositions => _clearingPositions;
+
+  void rotateCurrentPieceCW() {
+    _currentPiece = GamePiece(
+      shape: _currentPiece.shape.rotatedCW(),
+      word: _currentPiece.word,
+    );
+    notifyListeners();
+  }
+
+  void rotateCurrentPieceCCW() {
+    _currentPiece = GamePiece(
+      shape: _currentPiece.shape.rotatedCCW(),
+      word: _currentPiece.word,
+    );
+    notifyListeners();
+  }
+
   bool canPlaceCurrentPiece(Position origin) {
     return _board.canPlace(PiecePlacement(_currentPiece.shape, origin));
   }
@@ -82,10 +102,18 @@ class GameViewModel extends ChangeNotifier {
       final clears = _board.detectClears();
       if (clears.isEmpty) break;
 
-      // Wait briefly to allow UI to show filled lines before clearing
-      await Future.delayed(const Duration(milliseconds: 200));
+      // Mark positions for highlight animation
+      _clearingPositions = {
+        ...clears.rows.expand((r) => List.generate(GameBoard.size, (c) => Position(r, c))),
+        ...clears.cols.expand((c) => List.generate(GameBoard.size, (r) => Position(r, c))),
+      };
+      notifyListeners();
+
+      // Wait briefly to allow UI to show highlight
+      await Future.delayed(const Duration(milliseconds: 180));
 
       _board = _board.clearLines(clears);
+      _clearingPositions = {};
       _scoreCalculator.addClears(lines: clears.lineCount, chain: chain);
       chain++;
       notifyListeners();
@@ -120,5 +148,6 @@ class GameViewModel extends ChangeNotifier {
     _scoreCalculator.reset();
     await _initQueue();
     _placementCount = 0;
+    _clearingPositions = {};
   }
 }
