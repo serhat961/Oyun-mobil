@@ -159,8 +159,10 @@ class GameBoardWidget extends StatelessWidget {
   Widget _buildDragPreview(double cellSize) {
     if (currentPiece == null || dragPosition == null) return const SizedBox();
 
-    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null) return const SizedBox();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+        if (renderBox == null) return const SizedBox();
 
     final localPosition = renderBox.globalToLocal(dragPosition!);
     final gridCol = (localPosition.dx / (cellSize + 1)).floor();
@@ -168,16 +170,18 @@ class GameBoardWidget extends StatelessWidget {
 
     final canPlace = board.canPlacePiece(currentPiece!, gridRow, gridCol);
 
-    return Positioned(
-      left: gridCol * (cellSize + 1),
-      top: gridRow * (cellSize + 1),
-      child: IgnorePointer(
-        child: _buildPiecePreview(
-          currentPiece!,
-          cellSize,
-          canPlace,
-        ),
-      ),
+        return Positioned(
+          left: gridCol * (cellSize + 1),
+          top: gridRow * (cellSize + 1),
+          child: IgnorePointer(
+            child: _buildPiecePreview(
+              currentPiece!,
+              cellSize,
+              canPlace,
+            ),
+          ),
+        );
+      },
     );
   }
 

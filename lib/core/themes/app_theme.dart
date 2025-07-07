@@ -58,7 +58,7 @@ class AppTheme {
         ),
       ),
       
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: Colors.grey[850],
         elevation: 5,
         shape: RoundedRectangleBorder(
