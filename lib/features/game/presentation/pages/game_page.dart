@@ -30,12 +30,10 @@ class GamePage extends StatelessWidget {
                 // Show achievement notifications first
                 if (state.newlyUnlockedAchievements.isNotEmpty) {
                   Future.delayed(const Duration(milliseconds: 300), () {
-                    if (context.mounted) {
-                      AchievementSequenceDialog.show(
-                        context, 
-                        state.newlyUnlockedAchievements,
-                      );
-                    }
+                    AchievementSequenceDialog.show(
+                      context, 
+                      state.newlyUnlockedAchievements,
+                    );
                   });
                 }
                 
@@ -47,13 +45,11 @@ class GamePage extends StatelessWidget {
                       : const Duration(milliseconds: 500);
                   
                   Future.delayed(delay, () {
-                    if (context.mounted) {
-                      LevelUpDialog.show(
-                        context, 
-                        state.newLevel ?? 1, 
-                        state.gainedXp ?? 0,
-                      );
-                    }
+                    LevelUpDialog.show(
+                      context, 
+                      state.newLevel ?? 1, 
+                      state.gainedXp ?? 0,
+                    );
                   });
                 }
               }
