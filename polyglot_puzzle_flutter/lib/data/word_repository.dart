@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import '../domain/sm2.dart';
 import '../domain/vocab_word.dart';
 import 'word_database.dart';
+import 'translation_service.dart';
 
 class WordRepository {
   static final WordRepository instance = WordRepository._internal();
@@ -24,6 +25,18 @@ class WordRepository {
     final db = await _db;
     final id = await db.insert('words', word.toMap());
     return word.copyWith(id: id);
+  }
+
+  Future<VocabWord> addTermAuto(String term, {String targetLang = 'Turkish'}) async {
+    final existing = await _query('term = ?', [term], 1);
+    if (existing.isNotEmpty) return existing.first;
+
+    String? translation;
+    try {
+      translation = await TranslationService.instance.translate(text: term, targetLang: targetLang);
+    } catch (_) {}
+    translation ??= term; // fallback same
+    return addWord(term, translation);
   }
 
   Future<void> updateWord(VocabWord word) async {
