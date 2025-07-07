@@ -182,6 +182,7 @@ class _BoardView extends StatelessWidget {
             painter: BoardPainter(
               board: board,
               clearing: viewModel.clearingPositions,
+              hover: viewModel.hoverPositions,
               cellSize: cellSize,
             ),
           ),
@@ -196,21 +197,28 @@ class _BoardView extends StatelessWidget {
                   return DragTarget<GamePiece>(
                     onWillAccept: (piece) {
                       if (piece == null) return false;
-                      return viewModel.canPlaceCurrentPiece(origin);
+                      final canPlace = viewModel.canPlaceCurrentPiece(origin);
+                      final abs = piece.shape.blocks.map((b) => origin + b).toSet();
+                      viewModel.setHoverPositions(abs);
+                      return canPlace;
                     },
+                    onLeave: (_) => viewModel.clearHover(),
                     onAccept: (_) {
                       viewModel.placeCurrentPiece(origin);
                       HapticFeedback.mediumImpact();
                     },
                     builder: (context, candidate, rejected) {
                       final isHovering = candidate.isNotEmpty;
+                      final valid = viewModel.canPlaceCurrentPiece(origin);
                       return Container(
                         width: cellSize,
                         height: cellSize,
                         margin: const EdgeInsets.all(2),
                         decoration: isHovering
                             ? BoxDecoration(
-                                color: Colors.deepPurple.withOpacity(0.3),
+                                color: valid
+                                    ? Colors.deepPurple.withOpacity(0.3)
+                                    : Colors.red.withOpacity(0.4),
                                 borderRadius: BorderRadius.circular(4),
                               )
                             : null,

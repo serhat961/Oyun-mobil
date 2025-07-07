@@ -64,6 +64,21 @@ class GameViewModel extends ChangeNotifier {
   Set<Position> _clearingPositions = {};
   Set<Position> get clearingPositions => _clearingPositions;
 
+  Set<Position> _hoverPositions = {};
+  Set<Position> get hoverPositions => _hoverPositions;
+
+  void setHoverPositions(Set<Position> positions) {
+    _hoverPositions = positions;
+    notifyListeners();
+  }
+
+  void clearHover() {
+    if (_hoverPositions.isNotEmpty) {
+      _hoverPositions = {};
+      notifyListeners();
+    }
+  }
+
   void rotateCurrentPieceCW() {
     _currentPiece = GamePiece(
       shape: _currentPiece.shape.rotatedCW(),
@@ -90,6 +105,7 @@ class GameViewModel extends ChangeNotifier {
 
     // Place piece on board
     _board = _board.place(placement);
+    clearHover();
     // Consider correct recall success (quality 4)
     await _wordRepo.review(_currentPiece.word, 4);
     notifyListeners();

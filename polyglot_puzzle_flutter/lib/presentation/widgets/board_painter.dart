@@ -7,8 +7,9 @@ class BoardPainter extends CustomPainter {
   final GameBoard board;
   final Set<Position> clearing;
   final double cellSize;
+  final Set<Position> hover;
 
-  BoardPainter({required this.board, required this.clearing, required this.cellSize});
+  BoardPainter({required this.board, required this.clearing, required this.hover, required this.cellSize});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -20,6 +21,8 @@ class BoardPainter extends CustomPainter {
         Color color;
         if (clearing.contains(pos)) {
           color = Colors.orange;
+        } else if (hover.contains(pos)) {
+          color = Colors.deepPurpleAccent.withOpacity(0.5);
         } else if (board.isFilled(pos)) {
           color = Colors.deepPurple;
         } else {
@@ -33,6 +36,6 @@ class BoardPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant BoardPainter oldDelegate) {
-    return oldDelegate.board != board || oldDelegate.clearing != clearing;
+    return oldDelegate.board != board || oldDelegate.clearing != clearing || oldDelegate.hover != hover;
   }
 }
