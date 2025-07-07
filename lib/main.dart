@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:polyglot_puzzle/core/themes/app_theme.dart';
 import 'package:polyglot_puzzle/features/game/presentation/pages/game_page.dart';
 import 'package:polyglot_puzzle/features/language_learning/domain/entities/vocabulary_word.dart';
+import 'package:polyglot_puzzle/features/game/presentation/widgets/player_profile_widget.dart';
 import 'package:uuid/uuid.dart';
 
 void main() async {
@@ -143,6 +144,15 @@ class HomePage extends StatelessWidget {
                   children: [
                     _buildSecondaryButton(
                       context,
+                      icon: Icons.person,
+                      label: 'Profile',
+                      onPressed: () {
+                        _showPlayerProfile(context);
+                      },
+                    ),
+                    const SizedBox(width: 16),
+                    _buildSecondaryButton(
+                      context,
                       icon: Icons.language,
                       label: 'Languages',
                       onPressed: () {
@@ -156,15 +166,6 @@ class HomePage extends StatelessWidget {
                       label: 'Leaderboard',
                       onPressed: () {
                         // Navigate to leaderboard
-                      },
-                    ),
-                    const SizedBox(width: 16),
-                    _buildSecondaryButton(
-                      context,
-                      icon: Icons.settings,
-                      label: 'Settings',
-                      onPressed: () {
-                        // Navigate to settings
                       },
                     ),
                   ],
@@ -231,6 +232,21 @@ class HomePage extends StatelessWidget {
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
+    );
+  }
+
+  void _showPlayerProfile(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.8,
+        decoration: const BoxDecoration(
+          color: Colors.transparent,
+        ),
+        child: const PlayerProfileWidget(),
+      ),
     );
   }
 
