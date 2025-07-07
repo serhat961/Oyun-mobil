@@ -5,6 +5,7 @@ import 'package:polyglot_puzzle/features/game/presentation/widgets/game_board_wi
 import 'package:polyglot_puzzle/features/game/presentation/widgets/piece_preview_widget.dart';
 import 'package:polyglot_puzzle/features/game/presentation/widgets/player_profile_widget.dart';
 import 'package:polyglot_puzzle/features/settings/presentation/pages/settings_page.dart';
+import 'package:polyglot_puzzle/features/achievements/presentation/widgets/achievement_unlock_dialog.dart';
 import 'package:polyglot_puzzle/features/language_learning/domain/entities/vocabulary_word.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -25,17 +26,36 @@ class GamePage extends StatelessWidget {
         body: SafeArea(
           child: BlocConsumer<GameBloc, GameState>(
             listener: (context, state) {
-              if (state is GameOverState && state.leveledUp == true) {
-                // Show level up dialog after a short delay
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (context.mounted) {
-                    LevelUpDialog.show(
-                      context, 
-                      state.newLevel ?? 1, 
-                      state.gainedXp ?? 0,
-                    );
-                  }
-                });
+              if (state is GameOverState) {
+                // Show achievement notifications first
+                if (state.newlyUnlockedAchievements.isNotEmpty) {
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    if (context.mounted) {
+                      AchievementSequenceDialog.show(
+                        context, 
+                        state.newlyUnlockedAchievements,
+                      );
+                    }
+                  });
+                }
+                
+                // Then show level up dialog if leveled up
+                if (state.leveledUp == true) {
+                  // Delay more if achievements are shown
+                  final delay = state.newlyUnlockedAchievements.isNotEmpty 
+                      ? const Duration(milliseconds: 2000) 
+                      : const Duration(milliseconds: 500);
+                  
+                  Future.delayed(delay, () {
+                    if (context.mounted) {
+                      LevelUpDialog.show(
+                        context, 
+                        state.newLevel ?? 1, 
+                        state.gainedXp ?? 0,
+                      );
+                    }
+                  });
+                }
               }
             },
             builder: (context, state) {
@@ -69,6 +89,7 @@ class GamePage extends StatelessWidget {
             board: state.board,
             currentPiece: state.currentPiece,
             dragPosition: state.dragPosition,
+            vocabularyWords: state.vocabularyWords,
             isAnimatingClear: state.isAnimatingClear,
             clearedRows: state.clearedRows,
             clearedCols: state.clearedCols,

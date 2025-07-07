@@ -259,6 +259,7 @@ class AchievementService {
   Future<List<Achievement>> updateAchievementProgress(Map<String, int> progressUpdates) async {
     final achievements = await getAllAchievements();
     final newlyUnlocked = <Achievement>[];
+    final updatedAchievements = <Achievement>[];
     
     for (final achievement in achievements) {
       final newProgress = progressUpdates[achievement.id];
@@ -274,10 +275,14 @@ class AchievementService {
         if (!achievement.isUnlocked && updatedAchievement.isUnlocked) {
           newlyUnlocked.add(updatedAchievement);
         }
+        
+        updatedAchievements.add(updatedAchievement);
+      } else {
+        updatedAchievements.add(achievement);
       }
     }
     
-    await _saveAchievements(achievements);
+    await _saveAchievements(updatedAchievements);
     return newlyUnlocked;
   }
 

@@ -82,6 +82,7 @@ class GameOverState extends GameState {
   final int? gainedXp;
   final bool? leveledUp;
   final int? newLevel;
+  final List<Achievement> newlyUnlockedAchievements;
 
   const GameOverState({
     required this.finalScore,
@@ -91,8 +92,9 @@ class GameOverState extends GameState {
     this.gainedXp,
     this.leveledUp,
     this.newLevel,
+    this.newlyUnlockedAchievements = const [],
   });
 
   @override
-  List<Object?> get props => [finalScore, level, linesCleared, elapsedTime, gainedXp, leveledUp, newLevel];
+  List<Object?> get props => [finalScore, level, linesCleared, elapsedTime, gainedXp, leveledUp, newLevel, newlyUnlockedAchievements];
 }

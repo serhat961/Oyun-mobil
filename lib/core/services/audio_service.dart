@@ -41,8 +41,9 @@ class AudioService {
   // Preload sound effects for better performance
   Future<void> _preloadSounds() async {
     try {
-      // Note: These would be actual sound files in assets/sounds/
-      // For now, we'll use system sounds as fallback
+      // Check if sound files exist
+      // For now we'll assume they don't exist and use fallback
+      print('Sound files not found, using fallback mode');
     } catch (e) {
       print('Failed to preload sounds: $e');
     }
@@ -54,8 +55,8 @@ class AudioService {
     try {
       await _sfxPlayer.play(AssetSource('sounds/piece_placed.mp3'));
     } catch (e) {
-      // Fallback to system sound
-      _playSystemSound();
+      // Fallback: silent operation (sound files not available)
+      print('Sound file not found: piece_placed.mp3');
     }
   }
 
@@ -64,7 +65,7 @@ class AudioService {
     try {
       await _sfxPlayer.play(AssetSource('sounds/line_clear.mp3'));
     } catch (e) {
-      _playSystemSound();
+      print('Sound file not found: line_clear.mp3');
     }
   }
 
@@ -73,7 +74,7 @@ class AudioService {
     try {
       await _sfxPlayer.play(AssetSource('sounds/combo.mp3'));
     } catch (e) {
-      _playSystemSound();
+      print('Sound file not found: combo.mp3');
     }
   }
 
@@ -82,7 +83,7 @@ class AudioService {
     try {
       await _sfxPlayer.play(AssetSource('sounds/level_up.mp3'));
     } catch (e) {
-      _playSystemSound();
+      print('Sound file not found: level_up.mp3');
     }
   }
 
@@ -91,7 +92,7 @@ class AudioService {
     try {
       await _sfxPlayer.play(AssetSource('sounds/game_over.mp3'));
     } catch (e) {
-      _playSystemSound();
+      print('Sound file not found: game_over.mp3');
     }
   }
 
@@ -100,7 +101,7 @@ class AudioService {
     try {
       await _sfxPlayer.play(AssetSource('sounds/button_click.mp3'));
     } catch (e) {
-      _playSystemSound();
+      print('Sound file not found: button_click.mp3');
     }
   }
 
@@ -109,7 +110,7 @@ class AudioService {
     try {
       await _sfxPlayer.play(AssetSource('sounds/piece_rotate.mp3'));
     } catch (e) {
-      _playSystemSound();
+      print('Sound file not found: piece_rotate.mp3');
     }
   }
 
@@ -118,7 +119,7 @@ class AudioService {
     try {
       await _sfxPlayer.play(AssetSource('sounds/word_reveal.mp3'));
     } catch (e) {
-      _playSystemSound();
+      print('Sound file not found: word_reveal.mp3');
     }
   }
 
@@ -130,7 +131,7 @@ class AudioService {
       await _musicPlayer.setVolume(_musicVolume);
       await _musicPlayer.play(AssetSource('sounds/background_music.mp3'));
     } catch (e) {
-      print('Failed to play background music: $e');
+      print('Background music file not found: background_music.mp3');
     }
   }
 
@@ -146,11 +147,7 @@ class AudioService {
     await _musicPlayer.resume();
   }
 
-  // System sound fallback
-  void _playSystemSound() {
-    // This would trigger device's system sound
-    // For now, just a placeholder
-  }
+
 
   // Getters and Setters
   bool get soundEnabled => _soundEnabled;

@@ -8,6 +8,7 @@ import 'package:polyglot_puzzle/features/game/domain/entities/game_board.dart';
 import 'package:polyglot_puzzle/features/game/domain/entities/piece.dart';
 import 'package:polyglot_puzzle/features/language_learning/domain/entities/vocabulary_word.dart';
 import 'package:polyglot_puzzle/features/game/data/repositories/game_repository.dart';
+import 'package:polyglot_puzzle/features/achievements/domain/entities/achievement.dart';
 import 'package:polyglot_puzzle/core/services/audio_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -275,6 +276,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         gainedXp: gainedXp,
         leveledUp: progress.leveledUp,
         newLevel: progress.level,
+        newlyUnlockedAchievements: progress.newlyUnlockedAchievements,
       ));
     } catch (e) {
       // Fallback without progress tracking

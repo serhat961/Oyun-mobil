@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:polyglot_puzzle/features/achievements/data/services/achievement_service.dart';
+import 'package:polyglot_puzzle/features/achievements/domain/entities/achievement.dart';
 
 class GameRepository {
   static const String _highScoreKey = 'high_score';
@@ -127,18 +128,21 @@ class GameRepository {
     final gamesPlayed = await getGamesPlayed();
     final totalLinesCleared = await getLinesCleared();
     
-    await achievementService.checkGameplayAchievements(
+    final gameplayAchievements = await achievementService.checkGameplayAchievements(
       score: session.score,
       linesCleared: totalLinesCleared,
       gamesPlayed: gamesPlayed,
       gameTimeSeconds: session.playTimeInSeconds,
     );
     
-    await achievementService.checkProgressionAchievements(
+    final progressionAchievements = await achievementService.checkProgressionAchievements(
       playerLevel: progress.level,
     );
     
-    return progress;
+    // Combine all newly unlocked achievements
+    final allNewAchievements = [...gameplayAchievements, ...progressionAchievements];
+    
+    return progress.copyWith(newlyUnlockedAchievements: allNewAchievements);
   }
 
   int calculateXpGain(GameSession session) {
@@ -175,13 +179,31 @@ class PlayerProgress {
   final int experiencePoints;
   final int experienceToNextLevel;
   final bool leveledUp;
+  final List<Achievement> newlyUnlockedAchievements;
 
   PlayerProgress({
     required this.level,
     required this.experiencePoints,
     required this.experienceToNextLevel,
     required this.leveledUp,
+    this.newlyUnlockedAchievements = const [],
   });
+
+  PlayerProgress copyWith({
+    int? level,
+    int? experiencePoints,
+    int? experienceToNextLevel,
+    bool? leveledUp,
+    List<Achievement>? newlyUnlockedAchievements,
+  }) {
+    return PlayerProgress(
+      level: level ?? this.level,
+      experiencePoints: experiencePoints ?? this.experiencePoints,
+      experienceToNextLevel: experienceToNextLevel ?? this.experienceToNextLevel,
+      leveledUp: leveledUp ?? this.leveledUp,
+      newlyUnlockedAchievements: newlyUnlockedAchievements ?? this.newlyUnlockedAchievements,
+    );
+  }
 }
 
 class PlayerStats {

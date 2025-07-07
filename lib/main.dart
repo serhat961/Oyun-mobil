@@ -6,6 +6,7 @@ import 'package:polyglot_puzzle/features/language_learning/domain/entities/vocab
 import 'package:polyglot_puzzle/features/game/presentation/widgets/player_profile_widget.dart';
 import 'package:polyglot_puzzle/features/settings/presentation/pages/settings_page.dart';
 import 'package:polyglot_puzzle/features/tutorial/presentation/pages/tutorial_page.dart';
+import 'package:polyglot_puzzle/features/achievements/presentation/pages/achievements_page.dart';
 import 'package:polyglot_puzzle/core/services/audio_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -185,10 +186,15 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 16),
                     _buildSecondaryButton(
                       context,
-                      icon: Icons.language,
-                      label: 'Languages',
+                      icon: Icons.emoji_events,
+                      label: 'Achievements',
                       onPressed: () {
-                        // Navigate to language selection
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AchievementsPage(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(width: 16),
