@@ -19,6 +19,7 @@ import '../screens/settings_screen.dart';
 import './game_over_dialog.dart';
 import '../../domain/score_repository.dart';
 import '../widgets/board_painter.dart';
+import '../screens/word_list_screen.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -54,6 +55,10 @@ class GameScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('${loc.score}: ${viewModel.score}'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(6),
+          child: LinearProgressIndicator(value: viewModel.xpProgress),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -103,6 +108,12 @@ class GameScreen extends StatelessWidget {
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StoreScreen()));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const WordListScreen()));
             },
           ),
           IconButton(
@@ -156,6 +167,45 @@ Future<void> _showWordDetails(BuildContext context, VocabWord word) async {
               ),
             );
           },
+        );
+      });
+}
+
+void _showQualitySheet(BuildContext context, GameViewModel vm) {
+  final word = vm.lastWord!;
+  showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${word.term} = ${word.translation}', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      vm.submitQuality(5);
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(Icons.check),
+                    label: const Text('Bildi'),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      vm.submitQuality(2);
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(Icons.close),
+                    label: const Text('Bilemedi'),
+                  ),
+                ],
+              )
+            ],
+          ),
         );
       });
 }

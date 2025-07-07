@@ -11,10 +11,12 @@ import '../../domain/score_calculator.dart';
 import '../../domain/position.dart';
 import '../../monetization/ad_manager.dart';
 import '../../domain/score_repository.dart';
+import '../../domain/level_manager.dart';
 
 class GameViewModel extends ChangeNotifier {
   GameBoard _board = GameBoard.empty();
   final ScoreCalculator _scoreCalculator = ScoreCalculator();
+  final LevelManager _levelManager = LevelManager();
 
   final PieceGenerator _generator = PieceGenerator();
   final WordRepository _wordRepo = WordRepository.instance;
@@ -28,6 +30,9 @@ class GameViewModel extends ChangeNotifier {
   final List<GamePiece> _nextPieces = [];
 
   int _placementCount = 0;
+
+  VocabWord? _lastWord;
+  VocabWord? get lastWord => _lastWord;
 
   GameViewModel() {
     _initQueue();
@@ -57,6 +62,9 @@ class GameViewModel extends ChangeNotifier {
 
   GameBoard get board => _board;
   int get score => _scoreCalculator.score;
+  int get level => _levelManager.level;
+  int get xp => _levelManager.xp;
+  double get xpProgress => _levelManager.progress;
   GamePiece get currentPiece => _currentPiece;
   List<GamePiece> get nextPieces => List.unmodifiable(_nextPieces);
 
@@ -105,6 +113,8 @@ class GameViewModel extends ChangeNotifier {
 
     // Place piece on board
     _board = _board.place(placement);
+    _lastWord = _currentPiece.word;
+    _levelManager.addXp(5);
     clearHover();
     // Consider correct recall success (quality 4)
     await _wordRepo.review(_currentPiece.word, 4);
@@ -134,6 +144,7 @@ class GameViewModel extends ChangeNotifier {
       _board = _board.clearLines(clears);
       _clearingPositions = {};
       _scoreCalculator.addClears(lines: clears.lineCount, chain: chain);
+      _levelManager.addXp(clears.lineCount * 10 * chain);
       chain++;
       notifyListeners();
     }
@@ -172,10 +183,18 @@ class GameViewModel extends ChangeNotifier {
     return false;
   }
 
+  Future<void> submitQuality(int quality) async {
+    if (_lastWord != null) {
+      await _wordRepo.review(_lastWord!, quality);
+      _lastWord = null;
+    }
+  }
+
   Future<void> reset() async {
     _initialized = false;
     _board = GameBoard.empty();
     _scoreCalculator.reset();
+    _levelManager.reset();
     await _initQueue();
     _placementCount = 0;
     _clearingPositions = {};

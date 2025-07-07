@@ -94,6 +94,10 @@ class WordRepository {
     return pool.take(count).toList();
   }
 
+  Future<List<VocabWord>> getAllWords() async {
+    return _query('1=1', [], 10000);
+  }
+
   Future<void> _seedSampleWords() async {
     const samples = [
       ['apple', 'elma'],
