@@ -18,6 +18,7 @@ import '../../l10n/app_localizations.dart';
 import '../screens/settings_screen.dart';
 import './game_over_dialog.dart';
 import '../../domain/score_repository.dart';
+import '../widgets/board_painter.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -168,48 +169,60 @@ class _BoardView extends StatelessWidget {
     final viewModel = context.watch<GameViewModel>();
     final board = viewModel.board;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(GameBoard.size, (row) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(GameBoard.size, (col) {
-            final origin = Position(row, col);
-            final filled = board.isFilled(origin);
-            final clearing = viewModel.clearingPositions.contains(origin);
-            return DragTarget<GamePiece>(
-              onWillAccept: (piece) {
-                if (piece == null) return false;
-                return viewModel.canPlaceCurrentPiece(origin);
-              },
-              onAccept: (_) {
-                viewModel.placeCurrentPiece(origin);
-                HapticFeedback.mediumImpact();
-              },
-              builder: (context, candidate, rejected) {
-                final isHovering = candidate.isNotEmpty;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 120),
-                  width: cellSize,
-                  height: cellSize,
-                  margin: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: clearing
-                        ? Colors.orange
-                        : filled
-                            ? Colors.deepPurple
-                            : isHovering
-                                ? Colors.deepPurple.withOpacity(0.3)
-                                : Colors.grey.shade800,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  // additional animation: scale
-                );
-              },
-            );
-          }),
-        );
-      }),
+    final size = GameBoard.size * cellSize;
+
+    return RepaintBoundary(
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+        children: [
+          CustomPaint(
+            size: Size.square(size),
+            painter: BoardPainter(
+              board: board,
+              clearing: viewModel.clearingPositions,
+              cellSize: cellSize,
+            ),
+          ),
+          // interaction layer
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(GameBoard.size, (row) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(GameBoard.size, (col) {
+                  final origin = Position(row, col);
+                  return DragTarget<GamePiece>(
+                    onWillAccept: (piece) {
+                      if (piece == null) return false;
+                      return viewModel.canPlaceCurrentPiece(origin);
+                    },
+                    onAccept: (_) {
+                      viewModel.placeCurrentPiece(origin);
+                      HapticFeedback.mediumImpact();
+                    },
+                    builder: (context, candidate, rejected) {
+                      final isHovering = candidate.isNotEmpty;
+                      return Container(
+                        width: cellSize,
+                        height: cellSize,
+                        margin: const EdgeInsets.all(2),
+                        decoration: isHovering
+                            ? BoxDecoration(
+                                color: Colors.deepPurple.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(4),
+                              )
+                            : null,
+                      );
+                    },
+                  );
+                }),
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -39,6 +39,12 @@ class SettingsScreen extends StatelessWidget {
               onChanged: (v) => settings.setThemeMode(v!),
             ),
             const Divider(),
+            SwitchListTile(
+              title: const Text('Performance Overlay'),
+              value: settings.showPerformance,
+              onChanged: (v) => settings.setShowPerformance(v),
+            ),
+            const Divider(),
             Text('Language', style: Theme.of(context).textTheme.titleMedium),
             ...AppLocalizations.supportedLocales.map((locale) => RadioListTile<Locale>(
                   title: Text(locale.languageCode.toUpperCase()),

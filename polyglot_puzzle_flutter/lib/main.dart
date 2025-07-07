@@ -50,6 +50,7 @@ class PolyglotPuzzleApp extends StatelessWidget {
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark),
           ),
+          debugShowPerformanceOverlay: settings.showPerformance,
           home: const GameScreen(),
         );
       }),

@@ -4,12 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsViewModel extends ChangeNotifier {
   Locale _locale = const Locale('en');
   ThemeMode _themeMode = ThemeMode.system;
+  bool _showPerformance = false;
 
   Locale get locale => _locale;
   ThemeMode get themeMode => _themeMode;
+  bool get showPerformance => _showPerformance;
 
   static const _localeKey = 'locale_code';
   static const _themeKey = 'theme_mode';
+  static const _perfKey = 'perf_overlay';
 
   SettingsViewModel() {
     _load();
@@ -21,6 +24,7 @@ class SettingsViewModel extends ChangeNotifier {
     _locale = Locale(code);
     final tm = prefs.getString(_themeKey) ?? 'system';
     _themeMode = _strToThemeMode(tm);
+    _showPerformance = prefs.getBool(_perfKey) ?? false;
     notifyListeners();
   }
 
@@ -36,6 +40,13 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, _themeModeToStr(mode));
+  }
+
+  Future<void> setShowPerformance(bool value) async {
+    _showPerformance = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_perfKey, value);
   }
 
   ThemeMode _strToThemeMode(String str) {
