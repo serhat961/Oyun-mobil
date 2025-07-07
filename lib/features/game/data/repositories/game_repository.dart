@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:polyglot_puzzle/features/achievements/data/services/achievement_service.dart';
 
 class GameRepository {
   static const String _highScoreKey = 'high_score';
@@ -107,7 +108,7 @@ class GameRepository {
   }
 
   // Game Session Data
-  Future<void> saveGameSession(GameSession session) async {
+  Future<PlayerProgress> saveGameSession(GameSession session) async {
     final currentHigh = await getHighScore();
     if (session.score > currentHigh) {
       await saveHighScore(session.score);
@@ -119,7 +120,25 @@ class GameRepository {
     
     // Add XP based on performance
     final gainedXp = calculateXpGain(session);
-    await addExperience(gainedXp);
+    final progress = await addExperience(gainedXp);
+    
+    // Check for achievements
+    final achievementService = AchievementService();
+    final gamesPlayed = await getGamesPlayed();
+    final totalLinesCleared = await getLinesCleared();
+    
+    await achievementService.checkGameplayAchievements(
+      score: session.score,
+      linesCleared: totalLinesCleared,
+      gamesPlayed: gamesPlayed,
+      gameTimeSeconds: session.playTimeInSeconds,
+    );
+    
+    await achievementService.checkProgressionAchievements(
+      playerLevel: progress.level,
+    );
+    
+    return progress;
   }
 
   int calculateXpGain(GameSession session) {

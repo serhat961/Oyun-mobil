@@ -7,6 +7,8 @@ import 'package:equatable/equatable.dart';
 import 'package:polyglot_puzzle/features/game/domain/entities/game_board.dart';
 import 'package:polyglot_puzzle/features/game/domain/entities/piece.dart';
 import 'package:polyglot_puzzle/features/language_learning/domain/entities/vocabulary_word.dart';
+import 'package:polyglot_puzzle/features/game/data/repositories/game_repository.dart';
+import 'package:polyglot_puzzle/core/services/audio_service.dart';
 import 'package:uuid/uuid.dart';
 
 part 'game_event.dart';
@@ -15,9 +17,17 @@ part 'game_state.dart';
 class GameBloc extends Bloc<GameEvent, GameState> {
   final _uuid = const Uuid();
   final Random _random = Random();
+  final GameRepository _gameRepository;
+  final AudioService _audioService;
   Timer? _gameTimer;
+  DateTime? _gameStartTime;
   
-  GameBloc() : super(GameInitial()) {
+  GameBloc({
+    GameRepository? gameRepository,
+    AudioService? audioService,
+  }) : _gameRepository = gameRepository ?? GameRepository(),
+       _audioService = audioService ?? AudioService(),
+       super(GameInitial()) {
     on<StartGame>(_onStartGame);
     on<PieceDragStarted>(_onPieceDragStarted);
     on<PieceDragUpdated>(_onPieceDragUpdated);
@@ -33,6 +43,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   void _onStartGame(StartGame event, Emitter<GameState> emit) {
     _gameTimer?.cancel();
+    _gameStartTime = DateTime.now();
     
     final board = GameBoard.initial();
     final nextPieces = _generateNextPieces(3, event.vocabularyWords);
@@ -116,6 +127,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     // Place the piece
     board = board.placePiece(event.piece, event.row, event.col);
     
+    // Play piece placed sound
+    _audioService.playPiecePlaced();
+    
     // Remove placed piece from next pieces
     final nextPieces = List<Piece>.from(board.nextPieces);
     nextPieces.removeWhere((p) => p.id == event.piece.id);
@@ -131,6 +145,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final clearResult = board.checkAndClearLines();
     
     if (clearResult.linesCleared > 0) {
+      // Play line clear sound (combo if multiple lines)
+      if (clearResult.linesCleared > 1) {
+        _audioService.playCombo();
+      } else {
+        _audioService.playLineClear();
+      }
+      
       // Start clear animation
       emit(currentState.copyWith(
         board: board,
@@ -184,6 +205,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     
     final rotatedPiece = currentState.currentPiece!.rotate();
     
+    // Play rotation sound
+    _audioService.playPieceRotate();
+    
     emit(currentState.copyWith(
       currentPiece: rotatedPiece,
     ));
@@ -213,18 +237,54 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     _startGameTimer();
   }
 
-  void _onGameOver(GameOver event, Emitter<GameState> emit) {
+  void _onGameOver(GameOver event, Emitter<GameState> emit) async {
     if (state is! GamePlaying) return;
     
     _gameTimer?.cancel();
     final currentState = state as GamePlaying;
     
-    emit(GameOverState(
-      finalScore: currentState.board.score,
-      level: currentState.board.level,
-      linesCleared: currentState.board.linesCleared,
-      elapsedTime: currentState.elapsedTime,
-    ));
+    // Calculate play time
+    final playTimeInSeconds = _gameStartTime != null 
+        ? DateTime.now().difference(_gameStartTime!).inSeconds
+        : currentState.elapsedTime.inSeconds;
+    
+    // Save game session
+    try {
+      final session = GameSession(
+        score: currentState.board.score,
+        linesCleared: currentState.board.linesCleared,
+        levelReached: currentState.board.level,
+        playTimeInSeconds: playTimeInSeconds,
+      );
+      
+      final progress = await _gameRepository.saveGameSession(session);
+      final gainedXp = _gameRepository.calculateXpGain(session);
+      
+      // Play appropriate sound
+      if (progress.leveledUp) {
+        _audioService.playLevelUp();
+      } else {
+        _audioService.playGameOver();
+      }
+      
+      emit(GameOverState(
+        finalScore: currentState.board.score,
+        level: currentState.board.level,
+        linesCleared: currentState.board.linesCleared,
+        elapsedTime: currentState.elapsedTime,
+        gainedXp: gainedXp,
+        leveledUp: progress.leveledUp,
+        newLevel: progress.level,
+      ));
+    } catch (e) {
+      // Fallback without progress tracking
+      emit(GameOverState(
+        finalScore: currentState.board.score,
+        level: currentState.board.level,
+        linesCleared: currentState.board.linesCleared,
+        elapsedTime: currentState.elapsedTime,
+      ));
+    }
   }
 
   List<Piece> _generateNextPieces(int count, List<VocabularyWord> vocabularyWords) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:polyglot_puzzle/features/game/domain/entities/piece.dart';
 import 'package:polyglot_puzzle/features/language_learning/domain/entities/vocabulary_word.dart';
+import 'package:polyglot_puzzle/core/services/audio_service.dart';
 import 'package:vibration/vibration.dart';
 
 class PiecePreviewWidget extends StatelessWidget {
@@ -72,6 +73,7 @@ class PiecePreviewWidget extends StatelessWidget {
         
         // Show word details
         if (word != null) {
+          AudioService().playWordReveal();
           _showWordDetails(context, word);
         }
       },

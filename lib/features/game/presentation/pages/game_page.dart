@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:polyglot_puzzle/features/game/presentation/bloc/game_bloc.dart';
 import 'package:polyglot_puzzle/features/game/presentation/widgets/game_board_widget.dart';
 import 'package:polyglot_puzzle/features/game/presentation/widgets/piece_preview_widget.dart';
+import 'package:polyglot_puzzle/features/game/presentation/widgets/player_profile_widget.dart';
+import 'package:polyglot_puzzle/features/settings/presentation/pages/settings_page.dart';
 import 'package:polyglot_puzzle/features/language_learning/domain/entities/vocabulary_word.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -21,7 +23,21 @@ class GamePage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.grey[900],
         body: SafeArea(
-          child: BlocBuilder<GameBloc, GameState>(
+          child: BlocConsumer<GameBloc, GameState>(
+            listener: (context, state) {
+              if (state is GameOverState && state.leveledUp == true) {
+                // Show level up dialog after a short delay
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  if (context.mounted) {
+                    LevelUpDialog.show(
+                      context, 
+                      state.newLevel ?? 1, 
+                      state.gainedXp ?? 0,
+                    );
+                  }
+                });
+              }
+            },
             builder: (context, state) {
               if (state is GamePlaying) {
                 return _buildGameContent(context, state);
@@ -243,7 +259,12 @@ class GamePage extends StatelessWidget {
         // Settings button
         IconButton(
           onPressed: () {
-            // Navigate to settings
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsPage(),
+              ),
+            );
           },
           icon: const Icon(Icons.settings),
           color: Colors.white,
@@ -335,6 +356,49 @@ class GamePage extends StatelessWidget {
             _buildStatRow('Level Reached', state.level.toString()),
             _buildStatRow('Lines Cleared', state.linesCleared.toString()),
             _buildStatRow('Time', _formatDuration(state.elapsedTime)),
+            if (state.gainedXp != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green[900]?.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green, width: 1),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Experience Gained',
+                      style: TextStyle(
+                        color: Colors.green[300],
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '+${state.gainedXp} XP',
+                      style: GoogleFonts.orbitron(
+                        color: Colors.green,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (state.leveledUp == true) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '🎉 Level Up! 🎉',
+                        style: TextStyle(
+                          color: Colors.amber,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {

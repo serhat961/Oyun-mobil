@@ -4,10 +4,16 @@ import 'package:polyglot_puzzle/core/themes/app_theme.dart';
 import 'package:polyglot_puzzle/features/game/presentation/pages/game_page.dart';
 import 'package:polyglot_puzzle/features/language_learning/domain/entities/vocabulary_word.dart';
 import 'package:polyglot_puzzle/features/game/presentation/widgets/player_profile_widget.dart';
+import 'package:polyglot_puzzle/features/settings/presentation/pages/settings_page.dart';
+import 'package:polyglot_puzzle/features/tutorial/presentation/pages/tutorial_page.dart';
+import 'package:polyglot_puzzle/core/services/audio_service.dart';
 import 'package:uuid/uuid.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize audio service
+  await AudioService().initialize();
   
   // Lock orientation to portrait
   await SystemChrome.setPreferredOrientations([
@@ -42,8 +48,34 @@ class PolyglotPuzzleApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAndShowTutorial();
+  }
+
+  Future<void> _checkAndShowTutorial() async {
+    final shouldShow = await TutorialPage.shouldShowTutorial();
+    if (shouldShow && mounted) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const TutorialPage(),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,10 +194,15 @@ class HomePage extends StatelessWidget {
                     const SizedBox(width: 16),
                     _buildSecondaryButton(
                       context,
-                      icon: Icons.leaderboard,
-                      label: 'Leaderboard',
+                      icon: Icons.settings,
+                      label: 'Settings',
                       onPressed: () {
-                        // Navigate to leaderboard
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsPage(),
+                          ),
+                        );
                       },
                     ),
                   ],

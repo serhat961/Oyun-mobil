@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:polyglot_puzzle/core/themes/app_theme.dart';
 import 'package:polyglot_puzzle/features/game/data/repositories/game_repository.dart';
+import 'package:polyglot_puzzle/features/achievements/data/services/achievement_service.dart';
+import 'package:polyglot_puzzle/features/achievements/domain/entities/achievement.dart';
 
 class PlayerProfileWidget extends StatefulWidget {
   const PlayerProfileWidget({Key? key}) : super(key: key);
@@ -11,7 +13,10 @@ class PlayerProfileWidget extends StatefulWidget {
 
 class _PlayerProfileWidgetState extends State<PlayerProfileWidget> {
   final GameRepository _gameRepository = GameRepository();
+  final AchievementService _achievementService = AchievementService();
   PlayerStats? _playerStats;
+  List<Achievement> _achievements = [];
+  Map<String, int> _achievementStats = {};
   bool _isLoading = true;
 
   @override
@@ -23,8 +28,13 @@ class _PlayerProfileWidgetState extends State<PlayerProfileWidget> {
   Future<void> _loadPlayerStats() async {
     try {
       final stats = await _gameRepository.getPlayerStats();
+      final achievements = await _achievementService.getAllAchievements();
+      final achievementStats = await _achievementService.getAchievementStats();
+      
       setState(() {
         _playerStats = stats;
+        _achievements = achievements;
+        _achievementStats = achievementStats;
         _isLoading = false;
       });
     } catch (e) {
@@ -136,6 +146,50 @@ class _PlayerProfileWidgetState extends State<PlayerProfileWidget> {
           
           const SizedBox(height: 16),
           
+          // Achievements Section
+          if (_achievementStats.isNotEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Başarımlar',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${_achievementStats['unlocked']}/${_achievementStats['total']}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.primaryBlue,
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Achievement completion bar
+            LinearProgressIndicator(
+              value: (_achievementStats['completion'] ?? 0) / 100,
+              backgroundColor: Colors.grey[700],
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+            ),
+            
+            const SizedBox(height: 8),
+            
+            Text(
+              '${_achievementStats['completion']}% tamamlandı',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Recent achievements (last 3 unlocked)
+            _buildRecentAchievements(),
+            
+            const SizedBox(height: 16),
+          ],
+          
           // Level Progress Details
           Container(
             padding: const EdgeInsets.all(12),
@@ -227,6 +281,99 @@ class _PlayerProfileWidgetState extends State<PlayerProfileWidget> {
     final currentXp = _playerStats!.experiencePoints;
     final nextLevelXp = _gameRepository.getXpForLevel(_playerStats!.level + 1);
     return nextLevelXp - currentXp;
+  }
+
+  Widget _buildRecentAchievements() {
+    final recentAchievements = _achievements
+        .where((a) => a.isUnlocked)
+        .toList()
+      ..sort((a, b) => (b.unlockedAt?.millisecondsSinceEpoch ?? 0)
+          .compareTo(a.unlockedAt?.millisecondsSinceEpoch ?? 0));
+    
+    final displayAchievements = recentAchievements.take(3).toList();
+    
+    if (displayAchievements.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey[800],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.emoji_events, color: Colors.grey[600]),
+            const SizedBox(width: 8),
+            Text(
+              'Henüz başarım kazanılmadı',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      );
+    }
+    
+    return Column(
+      children: displayAchievements.map((achievement) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[800],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Color(AchievementConstants.rarityConfig[achievement.rarity]!['color']),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Color(AchievementConstants.rarityConfig[achievement.rarity]!['color'])
+                        .withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.emoji_events,
+                    color: Color(AchievementConstants.rarityConfig[achievement.rarity]!['color']),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        achievement.name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        achievement.description,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '+${achievement.xpReward}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
   }
 }
 
