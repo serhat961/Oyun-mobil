@@ -17,7 +17,7 @@ class _AdBannerState extends State<AdBanner> {
   @override
   void initState() {
     super.initState();
-    if (!PurchaseManager.instance.isEntitled('remove_ads')) {
+    if (!PurchaseManager.instance.hasRemoveAds) {
       _bannerAd = AdManager.instance.createBannerAd();
     }
   }

@@ -51,6 +51,10 @@ class PurchaseManager {
 
   bool isEntitled(String productId) => entitlements.value.contains(productId);
 
+  bool get hasRemoveAds => isEntitled(_removeAdsId) || hasSubscription;
+  bool get hasPremiumPack => isEntitled(_premiumPackId);
+  bool get hasSubscription => isEntitled(_monthlySubId);
+
   String? price(String productId) => _productDetails[productId]?.price;
 
   // Secure storage entitlements

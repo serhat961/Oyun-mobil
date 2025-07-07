@@ -9,6 +9,9 @@ class TranslationService {
 
   TranslationService._internal() : _apiKey = const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
 
+  static const List<String> defaultLanguages = ['Turkish'];
+  static const List<String> premiumLanguages = ['Spanish', 'German', 'French', 'Italian'];
+
   Future<String?> translate({required String text, required String targetLang}) async {
     if (_apiKey.isEmpty) return null;
     try {

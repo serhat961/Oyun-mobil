@@ -6,6 +6,7 @@ import '../domain/vocab_word.dart';
 import 'word_database.dart';
 import 'translation_service.dart';
 import 'sync_service.dart';
+import 'purchase_manager.dart';
 
 class WordRepository {
   static final WordRepository instance = WordRepository._internal();
@@ -33,6 +34,12 @@ class WordRepository {
   Future<VocabWord> addTermAuto(String term, {String targetLang = 'Turkish'}) async {
     final existing = await _query('term = ?', [term], 1);
     if (existing.isNotEmpty) return existing.first;
+
+    // Check entitlement for language
+    final isPremiumLang = TranslationService.premiumLanguages.contains(targetLang);
+    if (isPremiumLang && !PurchaseManager.instance.hasPremiumPack) {
+      targetLang = 'Turkish';
+    }
 
     String? translation;
     try {

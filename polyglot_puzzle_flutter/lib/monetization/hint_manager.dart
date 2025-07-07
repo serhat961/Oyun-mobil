@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'purchase_manager.dart';
 
 class HintManager {
   static final HintManager instance = HintManager._internal();
@@ -19,6 +20,7 @@ class HintManager {
   }
 
   Future<bool> consumeHint() async {
+    if (PurchaseManager.instance.hasSubscription) return true;
     if (hints.value <= 0) return false;
     hints.value -= 1;
     await _storage.write(key: 'hints', value: hints.value.toString());

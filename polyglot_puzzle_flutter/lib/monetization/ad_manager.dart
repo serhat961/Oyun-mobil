@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'purchase_manager.dart';
 
 class AdManager {
   static final AdManager instance = AdManager._internal();
@@ -26,6 +27,7 @@ class AdManager {
 
   Future<bool> showInterstitial({required VoidCallback onShown, required VoidCallback onFailed}) async {
     final now = DateTime.now();
+    if (PurchaseManager.instance.hasRemoveAds) return false;
     if (now.difference(_lastInterstitial).inMinutes < 5) return false;
 
     if (_cachedInterstitial == null) {
